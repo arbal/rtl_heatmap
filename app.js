@@ -10,11 +10,11 @@ $(document).ready(function() {
         fastMode = true;
     }
 
-    if(window.localStorage.getItem("freqnr") !== null) {
+    if(window.localStorage.getItem("freqnr") !== undefined) {
         freqNr = parseInt(window.localStorage.getItem("freqnr"));
     }
 
-    if(window.localStorage.getItem("colormap") !== null) {
+    if(window.localStorage.getItem("colormap") !== undefined) {
         colorMap = JSON.parse(window.localStorage.getItem("colormap"));
     }   
 
@@ -406,7 +406,7 @@ function drawLabels(width) {
     for(var i = 0; i <= freqNr; i++) {
         var frq = frqStep*i;
 
-        ctx.font="14px Georgia";
+        ctx.font="13px sans-serif";
         ctx.fillStyle = "#ffffff";
         ctx.fillText(formatFreq(frq+freqMin),Math.round(step*i),20);
     }
