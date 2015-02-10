@@ -133,3 +133,7 @@ nav .nav-wrapper i {
 #sidenav-overlay {
     position: relative;
 }
+
+#freqNr {
+    border: 0;
+}
