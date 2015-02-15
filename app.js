@@ -106,6 +106,10 @@ function setColorScheme(scheme) {
         case 4:
             setScheme("#00ffff", "#7788ff", "#ff00ff");
             break;
+
+        case 5:
+            setScheme("#000000", "#184fbc", "#9e0005");
+            break;
     }
 }
 
