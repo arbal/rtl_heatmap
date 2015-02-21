@@ -10,15 +10,18 @@ $(document).ready(function() {
         fastMode = true;
     }
 
-    if(window.localStorage.getItem("freqnr") !== undefined) {
+    if(window.localStorage.getItem("freqnr") !== null) {
         freqNr = parseInt(window.localStorage.getItem("freqnr"));
     }
 
-    if(window.localStorage.getItem("colormap") !== undefined) {
+    if(window.localStorage.getItem("colormap") !== null) {
         colorMap = JSON.parse(window.localStorage.getItem("colormap"));
-    }   
-
-    displaySettings();
+    }
+    
+    if(window.localStorage.getItem("streamurl") !== null) {
+        streamURL = window.localStorage.getItem("streamurl");   
+        updateStreamURL();
+    }
 
     $('#dismiss-button').click(function(ev) {
         ev.stopPropagation();
@@ -29,7 +32,7 @@ $(document).ready(function() {
         });
     });
 
-    $('#open-button').click(function(ev) {
+    $('.open-button').click(function(ev) {
         $('#open-modal').openModal(); 
     });
 
@@ -42,11 +45,7 @@ $(document).ready(function() {
         parseCSV(file);
     });
 
-    $('#setttings-button').click(function(ev) {
-        ev.stopPropagation();
-
-        showSettings();
-    });
+    handle_settings_button();
     
     $('#close-btn').click(function(ev) {
         ev.stopPropagation();
@@ -62,13 +61,33 @@ $(document).ready(function() {
         setColorScheme(color);
         var fmode = $('#fastmode').is(':checked');
         freqNr = $('#freqNr').val();
+        streamURL = $('#stream-url').val();
     
         window.localStorage.setItem("fastmode", fmode);
         window.localStorage.setItem("freqnr", freqNr);
         fastMode = fmode;
+
+        updateStreamURL();
+    });
+
+    $('.stream-button').click(function(ev) {
+        startStream();
     });
 
 });
+
+function handle_settings_button() {
+    $('.settings-button').click(function(ev) {
+        ev.stopPropagation();
+
+        showSettings();
+        $('ul.tabs').tabs('select_tab', 'display-settings');
+    });
+}
+
+function updateStreamURL() {
+    $('#stream-url-label').text("Stream URL (currently: " + streamURL + ")");
+}
 
 function displaySettings() {
     $('#freqNr').val(freqNr);
@@ -115,6 +134,7 @@ function setColorScheme(scheme) {
 
 function showSettings() {
     $('#settings-modal').openModal();    
+    displaySettings();
 }
 
 function showSpinner() {
@@ -180,7 +200,7 @@ function clearLoadState() {
     $('#load-state').text("");
 }
 
-function parseCSV(file) {
+function resetState() {
     img = [];
     numItems = 0;
     minDb = null;
@@ -191,7 +211,11 @@ function parseCSV(file) {
     lastTime = null;
     curSamps = [];
     freqs = [];
-    
+}
+
+function parseCSV(file) {
+    resetState();   
+ 
     Papa.parse(file.prop('files')[0], {
         worker: false,
         skipEmptyLines: true,
@@ -216,7 +240,7 @@ function parseCSV(file) {
                 drawAll();
                 hideSpinner();
            
-                $('#export-button').attr('href', canvas.toDataURL("image/png"));
+                $('.export-button').attr('href', canvas.toDataURL("image/png"));
             };
             
             if(!fastMode) {
@@ -240,6 +264,31 @@ function parseCSV(file) {
 
        }
     });
+}
+
+function parseStream() {
+    clearLoadState();
+    checkSingle();
+    drawAll();
+    hideSpinner();
+    pph = 1;
+
+    $('.export-button').attr('href', canvas.toDataURL("image/png"));
+
+    var $panzoom = $('.panzoom').panzoom();
+
+    $panzoom.parent().on('mousewheel.focal', function( e ) {
+        e.preventDefault();
+        var delta = e.delta || e.originalEvent.wheelDelta;
+        var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+        $panzoom.panzoom('zoom', zoomOut, {
+            increment: 0.1,
+            animate: false,
+            focal: e
+        });
+   });
+   
+   drawLabels(canvas.width);
 }
 
 var lastTime = null;
@@ -329,13 +378,20 @@ var maxDb = null;
 var minDb = null;
 
 var drawed = false;
+var scaleH;
+var scaleW;
+var height;
+var width;
+var pph;
+var ppw;
+var scale;
 
 function drawAll() {
     drawed = true;
 
     canvas = document.getElementById('spectrum');
-    var height = img.length;
-    var scaleH = 1;
+    height = img.length;
+    scaleH = 1;
 
     if(height > 16000) {
         while((height/scaleH) > 16000) {
@@ -348,8 +404,8 @@ function drawAll() {
         return;
     }   
 
-    var width = img[0].length;
-    var scaleW = 1;
+    width = img[0].length;
+    scaleW = 1;
 
     if(width > 16000) {
         while((width/scaleW) > 16000) {
@@ -360,11 +416,12 @@ function drawAll() {
     width = width/scaleW;
     height = height/scaleH;
 
-    var pph = Math.max(Math.round(canvas.height/height), 1);
-    var ppw = Math.max(Math.round(canvas.width/width), 1);
+    pph = Math.max(Math.round(canvas.height/height), 1);
+    ppw = Math.max(Math.round(canvas.width/width), 1);
 
     $(canvas).height(pph*height);
     $(canvas).width(ppw*width);
+    $('#freq-ruler').width(ppw*width);
 
     canvas.height = pph*height;
     canvas.width = ppw*width;
@@ -376,7 +433,7 @@ function drawAll() {
     console.log("[Rendering image] minFreq: " + freqMin + ", maxFreq: " + freqMax + ", width: " + width + ", height: " + height + ", PpH: " + pph + ", PpW: "+ ppw);
     console.log("min db: "+ minDb + ", max db: " + maxDb);
 
-    var scale = chroma.scale(colorMap);
+    scale = chroma.scale(colorMap);
 
     for(var y = 0; y < height; y++) {
         for(var x = 0; x < width; x++) {
@@ -393,6 +450,46 @@ function drawAll() {
     ctx.restore();
 }
 
+var firstStreamed = true;
+var offset = 0;
+function drawLast() {
+    if(firstStreamed) {
+        firstStreamed = false;
+        parseStream();
+    }
+    
+    var oldcanvas = document.createElement( "canvas" );
+    oldcanvas.height = canvas.height;
+    oldcanvas.width = canvas.width;
+
+    oldcanvas.getContext("2d").drawImage(canvas, 0, 0);
+
+    canvas = document.getElementById('spectrum');
+    height += pph;
+
+    $(canvas).height(pph*height);
+    canvas.height = pph*height;
+
+    ctx.drawImage(oldcanvas, 0, 0, oldcanvas.width, oldcanvas.height);
+    //ctx.save();
+
+    console.log("[Rendering image] minFreq: " + freqMin + ", maxFreq: " + freqMax + ", width: " + width + ", height: " + height + ", PpH: " + pph + ", PpW: "+ ppw);
+    console.log("min db: "+ minDb + ", max db: " + maxDb);
+
+    var y = img.length -1;
+
+    for(var x = 0; x < width; x++) {
+        var db = Math.round(img[y][x]);
+        var dbP = ((102-db)-minDb)/(maxDb-minDb);
+        var color = scale(dbP).hex();
+        ctx.fillStyle = color;
+        ctx.fillRect(x*ppw, numItems*pph, ppw, pph);
+    }
+
+    //ctx.restore();
+    $('.export-button').attr('href', canvas.toDataURL("image/png"));
+}
+
 function formatFreq(freq) {
     if(freq > 1e6) {
         return (parseInt(freq)/1e6).toFixed(2) + "M";
@@ -406,13 +503,23 @@ function formatFreq(freq) {
 function drawLabels(width) {
     var step = width/freqNr;
     var frqStep = (freqMax-freqMin)/freqNr;
-    
+    var freqCont = $('#freq-ruler'); 
+    freqCont.empty();
+
     for(var i = 0; i <= freqNr; i++) {
         var frq = frqStep*i;
-
+        var mark = $('<span>');
+        mark.css('display', 'block');
+        mark.css('position', 'absolute');
+        mark.css('left', Math.round(step*i) + 'px');
+        
+        mark.text(formatFreq(frq+freqMin));
+        freqCont.append(mark);
+        /*
         ctx.font="13px sans-serif";
         ctx.fillStyle = "#ffffff";
         ctx.fillText(formatFreq(frq+freqMin),Math.round(step*i),20);
+        */
     }
 }
 
@@ -422,4 +529,96 @@ function redraw() {
     }
 
     drawAll();
+}
+
+var streamURL = "ws://127.0.0.1:8080";
+var streamSock = null;
+var streamToast = null;
+var streamRunning = false;
+
+function websocket_handlemsg(msg) {
+   if(msg.data === "hello") {
+        toast("Server says " + msg.data, 3000);
+        firstStreamed = true;
+        resetState();
+        dismiss_connecting();
+        
+        $('.stream-icon').each(function() {
+            $(this).removeClass('fa-play');
+            $(this).addClass('fa-stop');
+        });
+
+        $('.stream-text').each(function() {
+            $(this).text("Stop Stream");
+        });
+
+        streamRunning = true;
+        return;
+   }
+
+   updateLoadState();
+
+   var dat = JSON.parse(msg.data);
+   console.log(dat);
+   handleSamples(dat);
+   drawLast();
+}
+
+function websocket_close() {
+    streamRunning = false;
+
+    $('.stream-icon').each(function() {
+        $(this).removeClass('fa-stop');
+        $(this).addClass('fa-play');
+    });
+
+    $('.stream-text').each(function() {
+        $(this).text("Stream");
+    });
+
+}
+
+function websocket_connect() {
+   streamSock = new WebSocket(streamURL);
+   streamSock.onerror = function() {
+        dismiss_connecting();
+        toast("Could not connect to server. Are you sure that the stream URL " + streamURL + " is correct?<a class=\"btn-flat yellow-text toast-action settings-button\" href=\"#\">Settings<a>", 8000);
+
+        handle_settings_button();
+   };
+
+   streamSock.onmessage = websocket_handlemsg;
+   streamSock.onclose = websocket_close;
+}
+
+function dismiss_connecting() {
+    if(streamToast !== null) {
+        streamToast.remove();
+    }
+}
+
+function startStream() {
+    if(streamRunning) {
+        streamSock.onmessage = null;
+        streamSock.onclose = null;
+        streamSock = null;
+        websocket_close();
+        return;
+    }
+
+    if(streamURL == null) {
+        toast("Please set the stream-URL first!", 4000);
+        return;   
+    }
+
+    toast("<span>Connecting to stream server...</span><a class=\"btn-flat yellow-text toast-action stream-cancel\" href=\"#\">Cancel<a>", 800000);
+
+    $('.stream-cancel').click(function(c) {
+       dismiss_connecting();
+       streamSock = null;
+    });
+
+    streamToast = $('.stream-cancel').parent();
+
+    websocket_connect();
 }

@@ -17,7 +17,7 @@
   ],
   "license": "MIT",
   "homepage": "heat.wq.lc",
-  "private": false,
+  "private": true,
   "ignore": [
     "**/.*",
     "node_modules",

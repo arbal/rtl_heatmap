@@ -60,7 +60,7 @@ nav {
 }
 
 .spectrum {
-    margin-top: 70px;
+    margin-top: 20px;
     position: relative;
     height: 100%;
     width: 100%;
@@ -68,6 +68,14 @@ nav {
 
 .open-file, .modal {
     background-color: #0A535D;
+}
+
+.tabs li.tab {
+    background-color: #196671;
+}
+
+.tabs li.tab a {
+    color: #fff;
 }
 
 .btn {
@@ -105,8 +113,42 @@ nav {
     height: 25px;
 }
 
+.modal {
+    max-height: 85%;
+    width: 70%;
+    top: 5%;
+}
+
+.modal-padding {
+    padding: 24px;
+}
+
+#settings-modal {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 24px;
+}
+
+#settings-modal h4 {
+    padding-left: 24px;
+}
+
 #settings-modal p label {
     width: 200px;
+}
+
+.settings-tab {
+    padding-left: 24px;
+    padding-right: 24px;
+    margin-top: 24px;
+}
+
+.tabs .indicator {
+    background-color: #fff;
+}
+
+.tabs li.tab a:hover {
+    color: #bbb;
 }
 
 .valign-wrapper, .spinner, .spinner-layer, .valign {
@@ -137,4 +179,18 @@ nav .nav-wrapper i {
 #freqNr {
     border: 0;
     outline: 0;
+}
+
+.toast-action {
+    display: block;
+}
+
+#freq-ruler {
+    display: block;
+    margin-top: 70px;
+    position: relative;
+}
+
+#freq-ruler span {
+    color: #fff;
 }
