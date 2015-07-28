@@ -12,7 +12,10 @@ class SockClient(WebSocket):
     def handleMessage(self):
         if self.data is None:
             self.data = ''
-            self.sendMessage(str(self.data))
+            try:
+                self.sendMessage(str(self.data))
+            except:
+                print "Could not send message to client."
 
     def handleConnected(self):
         print self.address, 'connected'
