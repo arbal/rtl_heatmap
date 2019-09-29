@@ -558,10 +558,14 @@ function websocket_handlemsg(msg) {
 
    updateLoadState();
 
-   var dat = JSON.parse(msg.data);
-   console.log(dat);
-   handleSamples(dat);
-   drawLast();
+   var reader = new FileReader();
+   reader.onload = function() {
+        var dat = JSON.parse(reader.result);
+        console.log(dat);
+        handleSamples(dat);
+        drawLast();  
+   }
+   reader.readAsText(msg.data);
 }
 
 function websocket_close() {

@@ -21,8 +21,6 @@ class SockClient(WebSocket):
         print self.address, 'connected'
         clients.append(self)
 
-        self.sendMessage("hello");
-
     def handleClose(self):
         clients.remove(self)
 
