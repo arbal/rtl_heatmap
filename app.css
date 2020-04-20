@@ -194,3 +194,17 @@ nav .nav-wrapper i {
 #freq-ruler span {
     color: #fff;
 }
+
+.tabs.row {
+    height: 48px !important;
+    margin-bottom: 24px;
+}
+
+#display-settings, #streaming-settings {
+    margin-top: 64px;
+    padding-bottom: 24px;
+}
+
+.settings-tab {
+    padding-bottom: 24px;
+}

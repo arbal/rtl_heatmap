@@ -14,17 +14,17 @@
         <meta name="DC.Language" content="de">
         <meta name="theme-color" content="#0C2023">
 
-        <link rel="stylesheet" href="bower_components/materialize/dist/css/materialize.min.css">
+        <link rel="stylesheet" href="node_modules/materialize-css/dist/css/materialize.min.css">
         <link rel="stylesheet" href="app.css">
-        <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
+        <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
 
-        <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
-        <script type="text/javascript" src="bower_components/chroma-js/chroma.min.js"></script>
+        <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="node_modules/chroma-js/chroma.min.js"></script>
         <script type="text/javascript" src="app.js"></script>
-        <script type="text/javascript" src="bower_components/materialize/dist/js/materialize.min.js"></script>
-        <script type="text/javascript" src="bower_components/papaparse/papaparse.min.js"></script>
-        <script type="text/javascript" src="bower_components/jquery.panzoom/dist/jquery.panzoom.min.js"></script>
-        <script type="text/javascript" src="bower_components/jquery-mousewheel/jquery.mousewheel.min.js"></script>
+        <script type="text/javascript" src="node_modules/materialize-css/dist/js/materialize.min.js"></script>
+        <script type="text/javascript" src="node_modules/papaparse/papaparse.min.js"></script>
+        <script type="text/javascript" src="node_modules/jquery.panzoom/dist/jquery.panzoom.min.js"></script>
+        <script type="text/javascript" src="node_modules/jquery-mousewheel/jquery.mousewheel.js"></script>
     </head>
 
     <body>
@@ -39,7 +39,7 @@
                     <li><a href="#" class="export-button"><i class="fa fa-hdd-o"></i>Save PNG</a></li>
                 </ul>
 
-                <ul id="nav-mobile" class="side-nav">
+                <ul id="nav-mobile" class="sidenav">
                     <li><a href="#" class="settings-button"><i class="fa fa-cogs"></i>Settings</a></li>
                     <li><a href="#" class="open-button"><i class="fa fa-folder-open-o"></i>Open CSV</a></li>
                     <li><a href="#" class="stream-button"><i class="fa fa-play stream-icon"></i><span class="stream-text">Stream</span></a></li>
@@ -81,14 +81,15 @@
             <form action="#">
                 <div class="file-field input-field">
                     <input class="file-path validate" type="text"/>
-                    <div class="btn">
+                    <input id="file" type="file" class="validate" />
+                    <div class="btn" id="file-btn">
                         <span>CSV</span>
-                        <input id="file" type="file" class="validate" />
                     </div>
                 </div>
             </form>
             <br>
             <div>
+		<br><br>
                 <a class="waves-effect waveslight btn" id="display-btn" class="display-btn">Display</a> 
             </div>
         </div>
@@ -100,46 +101,58 @@
         <div id="settings-modal" class="modal white-text">
             <h4>Settings</h4>
             <div>
-                <div class="col s12">
-                    <ul class="tabs">
-                        <li class="tab col s3"><a href="#display-settings">Display</a></li>
-                        <li class="tab col s3"><a href="#streaming-settings">Streaming</a></li>
+                <div class="col s12 settings-tab">
+                    <ul class="tabs row">
+                        <li class="tab col s6"><a href="#display-settings">Display</a></li>
+                        <li class="tab col s6"><a href="#streaming-settings">Streaming</a></li>
                     </ul>
                 </div>
                 <div id="display-settings" class="col s12 settings-tab">
                     <p>
-                        <input name="fastmode" id="fastmode" type="checkbox">
-                        <label for="fastmode">Fast CSV parsing. (Browser may become unresponsive!)</label>
-                    </p>
+		    	<label>
+                             <input name="fastmode" id="fastmode" type="checkbox">
+			     <span>Fast CSV parsing. (Browser may become unresponsive!)</span>
+			</label>
+		    </p>
                     <p class="range-field">
                         <input type="range" id="freqNr" min="0" max="200" />
                         <label for="freqNr">Number of frequency markings</label>
                     </p>
                     <br>
                     <p>
-                        <input name="color-scheme" type="radio" id="scheme1" value="1">
-                        <label for="scheme1">Default Flat</label>
-                        <span class="scheme"><span style="background-color: #2D7B86"></span><span style="background-color: #DB8E47"></span><span style="background-color: #DB5147"></span></span>
+		    	<label>
+				<input name="color-scheme" type="radio" id="scheme1" value="1">
+				<span>Default Flat</span>
+				<span class="scheme"><span style="background-color: #2D7B86"></span><span style="background-color: #DB8E47"></span><span style="background-color: #DB5147"></span></span>
+			</label>
                     </p>
                     <p>
+		    	<label>
                         <input name="color-scheme" type="radio" id="scheme2" value="2">
-                        <label for="scheme2">Jet</label>
+                        <span>Jet</span>
                         <span class="scheme" style="margin-left: 20px;"><span style="background-color: #0000bd"></span><span style="background-color: #a7ff58"></span><span style="background-color: #840000"></span></span>
+			</label>
                     </p>
                     <p>
+		    	<label>
                         <input name="color-scheme" type="radio" id="scheme3" value="3">
-                        <label for="scheme3">Hot</label>
+                        <span>Hot</span>
                         <span class="scheme"><span style="background-color: #ffffff"></span><span style="background-color: #ff7f00"></span><span style="background-color: #2F0000"></span></span>
+			</label>
                     </p>
                     <p>
+		    	<label>
                         <input name="color-scheme" type="radio" id="scheme4" value="4">
-                        <label for="scheme4">Cool</label>
+                        <span>Cool</span>
                         <span class="scheme"><span style="background-color: #00ffff"></span><span style="background-color: #7788ff"></span><span style="background-color: #ff00ff"></span></span>
+			</label>
                     </p>
                     <p>
+		    	<label>
                         <input name="color-scheme" type="radio" id="scheme5" value="5">
-                        <label for="scheme5">Dark</label>
+                        <span>Dark</span>
                         <span class="scheme"><span style="background-color: #000000"></span><span style="background-color: #184fbc"></span><span style="background-color: #9e0005"></span>
+			</label>
                     </p>
                 </div>
                 <div id="streaming-settings" class="col s12 settings-tab">

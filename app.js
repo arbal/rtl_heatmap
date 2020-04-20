@@ -1,5 +1,20 @@
 $(document).ready(function() {
-    $(".button-collapse").sideNav();
+    $(".button-collapse").sidenav();
+    $('.modal').modal(); 
+
+    $('.settings-button').click(function() {
+	    var md = document.getElementById('settings-modal');
+	    M.Modal.getInstance(md).open();
+    });
+
+    $('.open-button').click(function() {
+	    var md = document.getElementById('open-modal');
+	    M.Modal.getInstance(md).open();
+    });
+
+    $('#file-btn').click(function() {
+	    $('#file').trigger('click');
+    });
 
     if(window.localStorage.getItem("welcomed") === "true") {
         $('.open-file').hide();
@@ -32,15 +47,12 @@ $(document).ready(function() {
         });
     });
 
-    $('.open-button').click(function(ev) {
-        $('#open-modal').openModal(); 
-    });
-
     $('#display-btn').click(function(ev) {
         ev.stopPropagation();
 
         var file = $('#file');
-        $('#open-modal').closeModal();
+	var md = document.getElementById('open-modal');
+	M.Modal.getInstance(md).close();
         showSpinner();
         parseCSV(file);
     });
@@ -49,14 +61,16 @@ $(document).ready(function() {
     
     $('#close-btn').click(function(ev) {
         ev.stopPropagation();
-        $('#settings-modal').closeModal();
+	var md = document.getElementById('settings-modal');
+	M.Modal.getInstance(md).close();
     });
 
     $('#save-btn').click(function(ev) {
         ev.stopPropagation();
 
         var color = $('input:radio[name=color-scheme]').filter(":checked").val();
-        $('#settings-modal').closeModal();
+	var md = document.getElementById('settings-modal');
+	M.Modal.getInstance(md).close();
 
         setColorScheme(color);
         var fmode = $('#fastmode').is(':checked');
@@ -81,7 +95,7 @@ function handle_settings_button() {
         ev.stopPropagation();
 
         showSettings();
-        $('ul.tabs').tabs('select_tab', 'display-settings');
+        $('ul.tabs').tabs();
     });
 }
 
@@ -133,7 +147,6 @@ function setColorScheme(scheme) {
 }
 
 function showSettings() {
-    $('#settings-modal').openModal();    
     displaySettings();
 }
 
@@ -317,7 +330,11 @@ function sort(array){
 var sweep = [];
 
 function handleSamples(dat) {
-    var data = dat[0];
+    if (dat.length < 6) {
+	return;
+    }
+    
+    var data = dat;
     var time = data[0] + data[1].replace(' ', 'T') + "Z";
     var ptime = new Date(time);
 
@@ -462,14 +479,21 @@ function drawLast() {
     oldcanvas.height = canvas.height;
     oldcanvas.width = canvas.width;
 
-    oldcanvas.getContext("2d").drawImage(canvas, 0, 0);
+    var ctn = oldcanvas.getContext("2d");
+    if (!ctn) {
+        return;
+    }
+    ctn.drawImage(canvas, 0, 0);
 
     canvas = document.getElementById('spectrum');
     height += pph;
 
     $(canvas).height(pph*height);
     canvas.height = pph*height;
-
+    
+    if (!ctx) {
+        return;
+    }
     ctx.drawImage(oldcanvas, 0, 0, oldcanvas.width, oldcanvas.height);
     //ctx.save();
 
