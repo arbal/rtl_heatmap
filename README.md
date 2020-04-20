@@ -14,7 +14,5 @@ See [http://kmkeen.com/rtl-power/] for more infos.
 ```bash
 git clone https://github.com/donothingloop/rtl_heatmap.git
 cd rtl_heatmap
-npm install -g bower
-
-bower install
+npm install
 ```
