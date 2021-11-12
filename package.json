@@ -31,7 +31,7 @@
     "jquery": "^3.5.0",
     "jquery-mousewheel": "^3.1.13",
     "jquery.panzoom": "^3.2.3",
-    "materialize-css": "^1.0.0-rc.2",
+    "materialize-css": "^1.0.0",
     "papaparse": "^5.2.0"
   }
 }
